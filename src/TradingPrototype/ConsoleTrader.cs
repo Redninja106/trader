@@ -18,7 +18,7 @@ internal class ConsoleTrader : ITrader
 
     private TradeAction? position = null;
 
-    public void Pump(Dictionary<string, Candle> candles)
+    public void Pump(Dictionary<string, ICandle> candles)
     {
         if (position is null)
         {
@@ -35,9 +35,19 @@ internal class ConsoleTrader : ITrader
             if (Strategy.ShouldExit(pos, out var action))
             {
                 ClosedTrades.Add(pos);
-                Console.WriteLine($"Exited on {currentCandle.Timestamp} with a net change of ${pos.GainLoss} ({pos.GainLossPercent*100}%)");
+                Console.WriteLine($"Exited on {currentCandle.Timestamp} at ${pos.CloseCandle.Close} with a net change of ${pos.GainLoss} ({pos.GainLossPercent*100}%)");
                 this.position = null;
             }
         }
+    }
+
+    public void OnMarketClose(DateTime date)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void OnMarketOpen(DateTime date)
+    {
+        throw new NotImplementedException();
     }
 }

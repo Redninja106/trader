@@ -10,23 +10,31 @@ internal class TradePosition
     public DateTime OpenTime { get; private set; }
     public TimeSpan OpenDuration { get; private set; }
 
-    public float Cost { get; private set; }
+    public decimal Price { get; private set; }
     public int Quantity { get; private set; }
-    public float GainLoss { get; private set; }
-    public float GainLossPercent { get; private set; }
-    public float TotalCost => Cost * Quantity;
+    public decimal GainLoss { get; private set; }
+    public decimal GainLossPercent { get; private set; }
+    public decimal TotalCost => OpenCandle.Close * Quantity;
+    public decimal TotalValue=> CloseCandle.Close * Quantity;
+
     public string Symbol { get; private set; }
 
-    public TradePosition(TradeAction action, Candle currentCandle)
+    public ICandle CloseCandle { get; private set; }
+    public ICandle OpenCandle { get; private set; }
+
+    public TradePosition(TradeAction action, ICandle currentCandle)
     {
+        this.OpenCandle = action.Candle;
+        this.CloseCandle = currentCandle;
+
         OpenTime = action.Candle.Timestamp;
         OpenDuration = OpenTime - currentCandle.Timestamp;
 
-        Cost = action.Candle.Close;
-        Quantity = action.Quantity;
+        Price = action.Candle.Close;
+        Quantity = action.OrderAction == TradeAction.Action.Long ? action.Quantity : -action.Quantity;
         Symbol = action.Symbol;
-        GainLoss = currentCandle.Close * Quantity - TotalCost;
-        GainLossPercent = GainLoss / TotalCost; 
+        GainLoss = TotalValue - TotalCost;
+        GainLossPercent = GainLoss / Math.Abs(TotalCost); 
     }
 
 }
