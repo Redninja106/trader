@@ -9,5 +9,8 @@ namespace TradingPrototype;
 internal interface ITrader
 {
     IStrategy Strategy { get; }
-    public void Pump(Dictionary<string, Candle> candles);
+    public void Pump(Dictionary<string, ICandle> candles);
+
+    public void OnMarketClose(DateTime date);
+    public void OnMarketOpen(DateTime date);
 }

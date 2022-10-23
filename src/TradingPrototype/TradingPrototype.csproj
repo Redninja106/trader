@@ -8,12 +8,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Technicals\AverageVolumeAnalyzer.cs" />
+    <Compile Remove="Technicals\EMAAnalyzer.cs" />
+    <Compile Remove="Technicals\IAnalyzer.cs" />
+    <Compile Remove="Technicals\SMAAnalyzer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="SPY.csv" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="SPY.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="RawData\SPY.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
@@ -22,8 +29,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="^VIX.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <None Update="RawData\3Min1017_1021.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="RawData\^VIX.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

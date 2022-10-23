@@ -1,29 +1,34 @@
 ﻿using System.Diagnostics;
 using TradingPrototype;
+using TradingPrototype.Technicals;
 
-var strategy1 = new TestStrategy(new AverageVolumeAnalyzer(50));
-var strategy2 = new TestStrategy(new AverageVolumeAnalyzer(5));
 
-var trader1 = new ConsoleTrader(strategy1);
-var trader2 = new ConsoleTrader(strategy2);
+var spyData = DataSet.Load(Symbols.SPY, @".\RawData\3Min1017_1021.csv");
+spyData.AddTechnical(TechnicalAnalysis.Ema(8));
+spyData.AddTechnical(TechnicalAnalysis.Ema(21));
+spyData.AddTechnical(TechnicalAnalysis.AverageVolume(8));
 
-var spyData = DataSet.Load(Symbols.SPY, "SPY.csv");
-var vixData = DataSet.Load(Symbols.VIX, "^VIX.csv");
+var strategy1 = new TestStrategy(spyData);
 
-var marketRunner = new MarketRunner(new[] { spyData, vixData });
-
-marketRunner.Run(new[] { trader1, trader2 });
-
-float profits1 = 0;
-foreach (var trade in trader1.ClosedTrades)
+List<ITrader> traders = new List<ITrader>()
 {
-    profits1 += trade.GainLoss;
-}
-Console.WriteLine($"trader1 profited ${profits1} in {trader1.ClosedTrades.Count} trades!!!");
+    new ConsoleTrader(strategy1),
+};
 
-float profits2 = 0;
-foreach (var trade in trader2.ClosedTrades)
+var marketRunner = new MarketRunner(new[] { spyData });
+
+while(marketRunner.CanTrade)
 {
-    profits2 += trade.GainLoss;
+    marketRunner.Run(traders.ToArray());
 }
-Console.WriteLine($"trader2 profited ${profits2} in {trader2.ClosedTrades.Count} trades!!!");
+
+foreach (var trader in traders.OfType<ConsoleTrader>())
+{
+    decimal profits1 = 0;
+    foreach (var trade in trader.ClosedTrades)
+    {
+        //Console.WriteLine($"In at {trade.OpenCandle.Timestamp} Cost: {trade.OpenCandle.Close} Out:{trade.CloseCandle.Close}");
+        profits1 += trade.GainLoss;
+    }
+    Console.WriteLine($"trader1 profited ${profits1} in {trader.ClosedTrades.Count} trades!!!");
+}
