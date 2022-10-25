@@ -18,7 +18,7 @@ internal class MarketRunner
     public MarketRunner(IEnumerable<DataSet> dataSets, IEnumerable<DataSet>? staticDataSets = null)
     {
         var ds = dataSets.First();
-        if(!dataSets.Skip(1).All(d => d.Candles.Count == ds.Candles.Count && d.Candles.Select(c=>c.Timestamp).SequenceEqual(ds.Candles.Select(c=>c.Timestamp))))
+        if(!dataSets.Skip(1).All(d => d.Candles.Count() == ds.Candles.Count() && d.Candles.Select(c=>c.Timestamp).SequenceEqual(ds.Candles.Select(c=>c.Timestamp))))
         {
             throw new ArgumentOutOfRangeException("DataSets must align");
         };
@@ -36,26 +36,25 @@ internal class MarketRunner
 
     public void Run(IEnumerable<ITrader> traders)
     {
+        bool simpleMode = !dataSets.Any(ds => ds.CurrentCandleHasMoreTicks);
+
         foreach (var trader in traders)
         {
             // AssignMembers(trader.Strategy, dataSets);
-
-            bool simpleMode = false;
             if (simpleMode)
             {
-                dataSets.ForEach(ds => ds.Candles[ds.CurrentIndex].TickAll());
                 trader.Pump(dataSets.ToDictionary(d => d.Name, d => d.CurrentCandle as ICandle)); ;
             }
             else
             {
-                while (dataSets.Any(ds=>ds.Candles[ds.CurrentIndex].MoreTicks))
+                while (dataSets.Any(ds=>ds.CurrentCandleHasMoreTicks))
                 {
-                    dataSets.ForEach(ds => ds.Candles[ds.CurrentIndex].Tick());
+                    dataSets.ForEach(ds => ds.Tick());
                     trader.Pump(dataSets.ToDictionary(d => d.Name, d => d.CurrentCandle as ICandle)); ;
                 }
             }
         }
-        dataSets.ForEach(ds => ds.Advance());
+        dataSets.ForEach(ds => ds.AdvanceCandle());
     }
 
     private IEnumerable<DateTime> DataSetDays()

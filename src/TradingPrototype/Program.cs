@@ -8,6 +8,8 @@ spyData.AddTechnical(TechnicalAnalysis.Ema(8));
 spyData.AddTechnical(TechnicalAnalysis.Ema(21));
 spyData.AddTechnical(TechnicalAnalysis.AverageVolume(8));
 
+spyData.EmulateRealTime();
+
 var strategy1 = new TestStrategy(spyData);
 
 List<ITrader> traders = new List<ITrader>()
@@ -30,5 +32,5 @@ foreach (var trader in traders.OfType<ConsoleTrader>())
         //Console.WriteLine($"In at {trade.OpenCandle.Timestamp} Cost: {trade.OpenCandle.Close} Out:{trade.CloseCandle.Close}");
         profits1 += trade.GainLoss;
     }
-    Console.WriteLine($"trader1 profited ${profits1} in {trader.ClosedTrades.Count} trades!!!");
+    Console.WriteLine($"trader1 profited ${profits1:c} in {trader.ClosedTrades.Count} trades!!!");
 }

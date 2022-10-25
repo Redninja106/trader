@@ -26,7 +26,7 @@ internal class TestStrategy : IStrategy
         var emaHigh = driver.GetTechnicalIndicator<float>(TechnicalAnalysis.Ema(21));
 
         //Console.WriteLine($"Moving avgs: {driver.CurrentCandle.Timestamp} Low: {emaLow}, H: {emaHigh}");
-        //Console.WriteLine($"{driver!.Name} Candle " + driver.CurrentCandle.ToString()); ;
+        Console.WriteLine($"{driver!.Name} Candle " + driver.CurrentCandle.ToString()); ;
          
         var divergance = Math.Abs(emaHigh - emaLow);
         if (emaHigh > emaLow && divergance >.20)
