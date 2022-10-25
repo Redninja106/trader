@@ -53,9 +53,3 @@ namespace TradingPrototype;
 //    }
 //}
 
-interface ITick
-{
-    public ICandle Candle { get; }
-    public Quote Quote { get; }
-    public IEnumerable<ITick> Lookback { get; }
-}

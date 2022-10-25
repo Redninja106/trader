@@ -25,7 +25,7 @@ internal class ConsoleTrader : ITrader
             if (Strategy.ShouldEnter(out var action))
             {
                 position = action;
-                Console.WriteLine($"Entered on {action.Candle.Timestamp} at ${action.Candle.Close}");
+                Console.WriteLine($"Entered on {action.Candle.Timestamp} at ${action.Candle.Close:c}");
             }
         }
         else
@@ -35,7 +35,7 @@ internal class ConsoleTrader : ITrader
             if (Strategy.ShouldExit(pos, out var action))
             {
                 ClosedTrades.Add(pos);
-                Console.WriteLine($"Exited on {currentCandle.Timestamp} at ${pos.CloseCandle.Close} with a net change of ${pos.GainLoss} ({pos.GainLossPercent*100}%)");
+                Console.WriteLine($"Exited on {currentCandle.Timestamp} at ${pos.CloseCandle.Close:c} with a net change of ${pos.GainLoss:c} ({pos.GainLossPercent:P2}%)");
                 this.position = null;
             }
         }
