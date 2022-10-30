@@ -2,8 +2,9 @@
 using TradingPrototype;
 using TradingPrototype.Technicals;
 
-
-var spyData = DataSet.Load(Symbols.SPY, @".\RawData\3Min1017_1021.csv");
+Version v = new Version(1, 0, 3, 0);
+Version v1 = new Version(1, 0, 13, 0);
+var spyData = DataSet.Load(Symbols.SPY, @".\RawData\1010_22to10212022_3min.csv");
 spyData.AddTechnical(TechnicalAnalysis.Ema(8));
 spyData.AddTechnical(TechnicalAnalysis.Ema(21));
 spyData.AddTechnical(TechnicalAnalysis.AverageVolume(8));
@@ -27,10 +28,10 @@ while(marketRunner.CanTrade)
 foreach (var trader in traders.OfType<ConsoleTrader>())
 {
     decimal profits1 = 0;
-    foreach (var trade in trader.ClosedTrades)
+    foreach (var transaction in trader.Transactions)
     {
-        //Console.WriteLine($"In at {trade.OpenCandle.Timestamp} Cost: {trade.OpenCandle.Close} Out:{trade.CloseCandle.Close}");
-        profits1 += trade.GainLoss;
+        Console.WriteLine($"In @ {transaction.OpenTrade.TradeDate} Out @ {transaction.CloseTrade.TradeDate}, G/L:{transaction.Position.GainLoss:c},{transaction.Position.GainLossPercent:p2}");
+        profits1 += transaction.Position.GainLoss;
     }
-    Console.WriteLine($"trader1 profited ${profits1:c} in {trader.ClosedTrades.Count} trades!!!");
+    Console.WriteLine($"trader1 profited ${profits1:c} in {trader.Transactions.Count} trades!!!");
 }

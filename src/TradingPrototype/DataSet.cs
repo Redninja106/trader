@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
+using TradingPrototype.Options;
 using TradingPrototype.Technicals;
 
 namespace TradingPrototype;
@@ -25,6 +26,7 @@ internal class DataSet : IDataSetView, ITechnicalAnalysisView
         public List<Tick> Ticks { get; private set; }
     }
 
+    private EquitySymbol equitySymbol;
     private int currentCandleIndex = 0;
 
     private KeyValuePair<Candle, CandleData> currentCandleData;
@@ -42,14 +44,14 @@ internal class DataSet : IDataSetView, ITechnicalAnalysisView
     long[] volume;
 
     public DataSet(string name, IEnumerable<Candle> candles)
-        : this(name, name, candles)
+        : this(name, new EquitySymbol(name), candles)
     {
     }
 
-    public DataSet(string name, string symbol, IEnumerable<Candle> candles)
+    public DataSet(string name, EquitySymbol symbol, IEnumerable<Candle> candles)
     {
         this.Name = name;
-        this.Symbol = symbol;
+        this.equitySymbol = symbol;
 
         int bufferLength = candles.Count();
         date = new DateTime[bufferLength];
@@ -75,7 +77,7 @@ internal class DataSet : IDataSetView, ITechnicalAnalysisView
     {
         foreach(var c in candleData)
         {
-            c.Value.Ticks.AddRange(Candle.CreateTicks(c.Key, resolution));
+            c.Value.Ticks.AddRange(Tick.CreateTicks(c.Key, resolution));
         }
     }
 
@@ -111,7 +113,7 @@ internal class DataSet : IDataSetView, ITechnicalAnalysisView
     }   
 
     public string Name { get; private set; }
-    public string Symbol { get; private set; }
+    public string Symbol => this.equitySymbol.Symbol;
     public IEnumerable<Candle> Candles => candleData.Keys;
 
     public static DataSet Load(string symbol, string file)
@@ -143,7 +145,7 @@ internal class DataSet : IDataSetView, ITechnicalAnalysisView
     }
 
     // ticks the current Candle if in realtime mode
-    public bool Tick()
+    public bool TickCurrentCandle()
     {
         var candleData = this.currentCandleData;
 
@@ -189,21 +191,34 @@ internal class DataSet : IDataSetView, ITechnicalAnalysisView
     }
 
     public T GetTechnicalIndicator<T>(TechnicalIndicator indicator)
+         where T : TechnicalResult
     {
         var ta = this.currentCandleData.Value.Technicals[indicator];
 
         return (T)ta;
     }
     public T GetTechnicalIndicator<T>(ICandle candle, TechnicalIndicator indicator)
+         where T : TechnicalResult
     {
         var ta = this.candleData[(Candle)candle].Technicals[indicator];
 
         return (T)ta;
     }
 
-    public T[] GetTechnicals<T>(TechnicalIndicator indicator)
+    public T[] GetTechnicals<T>(TechnicalIndicator indicator) 
+        where T : TechnicalResult
     {
         var candleData = this.candleData.Take(this.currentCandleIndex).Select(t => t.Value.Technicals[indicator]);
         return candleData.Select(t => (T)t).ToArray();
+    }
+
+    public OptionChain QueryOptionChain(DateTime expiry)
+    {
+        return new OptionChain(this.CurrentCandle.Timestamp, this.equitySymbol, (double)this.CurrentCandle.Close, expiry);
+    }
+
+    public void Set(DateTime dt)
+    {
+        throw new NotImplementedException();
     }
 }

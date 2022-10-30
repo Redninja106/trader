@@ -47,14 +47,19 @@ internal class MarketRunner
             }
             else
             {
-                while (dataSets.Any(ds=>ds.CurrentCandleHasMoreTicks))
+                if (dataSets.Any(ds => ds.CurrentCandleHasMoreTicks))
                 {
-                    dataSets.ForEach(ds => ds.Tick());
-                    trader.Pump(dataSets.ToDictionary(d => d.Name, d => d.CurrentCandle as ICandle)); ;
+                    dataSets.ForEach(ds => ds.TickCurrentCandle());
+                    trader.Pump(dataSets.ToDictionary(d => d.Name, d => d.CurrentCandle as ICandle));
                 }
             }
         }
-        dataSets.ForEach(ds => ds.AdvanceCandle());
+
+        //only advance candle in simplemode or after all ticks in the candle have been pumped
+        if (dataSets.All(ds => !ds.CurrentCandleHasMoreTicks) || simpleMode)
+        {
+            dataSets.ForEach(ds => ds.AdvanceCandle());
+        }
     }
 
     private IEnumerable<DateTime> DataSetDays()
