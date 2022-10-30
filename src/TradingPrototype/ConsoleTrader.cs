@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TradingPrototype.Options;
 
 namespace TradingPrototype;
 internal class ConsoleTrader : ITrader
@@ -10,33 +11,46 @@ internal class ConsoleTrader : ITrader
     public ConsoleTrader(IStrategy strategy)
     {
         Strategy = strategy;
-        ClosedTrades = new();
+        Transactions = new();
     }
 
-    public List<TradePosition> ClosedTrades { get; }
+    public List<(TradeAction OpenTrade, TradeAction CloseTrade, TradePosition Position)> Transactions { get; }
     public IStrategy Strategy { get; }
 
-    private TradeAction? position = null;
+    private TradeAction? openAction = null;
 
     public void Pump(Dictionary<string, ICandle> candles)
     {
-        if (position is null)
+        if (openAction is null)
         {
             if (Strategy.ShouldEnter(out var action))
             {
-                position = action;
-                Console.WriteLine($"Entered on {action.Candle.Timestamp} at ${action.Candle.Close:c}");
+                openAction = action;
+                Console.WriteLine($"Entered on {action.TradeDate} at ${action.Price:c}");
             }
         }
         else
         {
-            var currentCandle = candles[position.Symbol];
-            var pos = new TradePosition(this.position, currentCandle);
+            var currentCandle = candles[openAction.Option != null ? openAction.Option.UnderlyingSymbol.Symbol : openAction.Symbol.Symbol];
+            TradePosition pos;
+
+            IOption option = null;
+            if(this.openAction.Option != null)
+            {
+                option = new Option(this.openAction.Option.Type, this.openAction.Option.UnderlyingSymbol, currentCandle.Timestamp, (double)currentCandle.Close, this.openAction.Option.StrikePrice, this.openAction.Option.Expiration);
+                pos = new TradePosition(currentCandle.Timestamp, this.openAction, option);
+            }
+            else
+            {
+                pos = new TradePosition(currentCandle.Timestamp, this.openAction, currentCandle);
+            }
+
+             
             if (Strategy.ShouldExit(pos, out var action))
             {
-                ClosedTrades.Add(pos);
-                Console.WriteLine($"Exited on {currentCandle.Timestamp} at ${pos.CloseCandle.Close:c} with a net change of ${pos.GainLoss:c} ({pos.GainLossPercent:P2}%)");
-                this.position = null;
+                Transactions.Add((openAction, action, pos));
+                Console.WriteLine($"Exited on {currentCandle.Timestamp} at {action.Price:c} with a net change of {pos.GainLoss:c} ({pos.GainLossPercent:P2}%)");
+                this.openAction = null;
             }
         }
     }

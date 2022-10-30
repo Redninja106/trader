@@ -10,5 +10,9 @@ internal interface ITechnicalAnalysisView
 
     DateTime[] TimeStamp { get; }
 
-    T[] GetTechnicals<T>(TechnicalIndicator indicator);
+    IEnumerable<ICandle> LookBack(int count);
+
+    T[] GetTechnicals<T>(TechnicalIndicator indicator) where T : TechnicalResult;
+    T GetTechnicalIndicator<T>(ICandle candle, TechnicalIndicator indicator) where T : TechnicalResult;
+
 }

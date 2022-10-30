@@ -25,10 +25,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="TALib.NETCore" Version="0.4.4" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="RawData\1010_22to10212022_3min.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="RawData\3Min1017_1021.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
